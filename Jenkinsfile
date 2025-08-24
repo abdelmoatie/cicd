@@ -20,7 +20,7 @@ pipeline {
             steps {
                 sh """
                 echo "Pushing Docker image to ECR..."
-                docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/${REPO_NAME}:${IMAGE_TAG}
+                docker push ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPO_NAME}:${IMAGE_TAG}
                 """
             }
         }
