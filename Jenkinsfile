@@ -33,7 +33,7 @@ pipeline {
         
         stage('deploy') {
             steps {
-                sh "docker run -d -p 808${env.BUILD_NUMBER}:80 ${REPO_NAME}:${env.BUILD_NUMBER}"
+                sh "docker run -d -p 80${env.BUILD_NUMBER}:80 ${REPO_NAME}:${env.BUILD_NUMBER}"
             }
         }
     }
