@@ -9,6 +9,16 @@ pipeline {
     }
     
     stages {
+        stage('Ensure ECR Repository Exists') {
+            steps {
+                sh """
+                echo "Checking if ECR repository ${REPO_NAME} exists..."
+                aws ecr describe-repositories --repository-names ${REPO_NAME} --region ${AWS_REGION} > /dev/null 2>&1 || \
+                aws ecr create-repository --repository-name ${REPO_NAME} --region ${AWS_REGION}
+                """
+            }
+        }
+        
         stage('build') {
             steps {
                 sh "docker build -t ${REPO_NAME}:${env.BUILD_NUMBER} ."
