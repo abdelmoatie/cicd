@@ -1,9 +1,17 @@
 pipeline {
     agent any
+
+    environment {
+        AWS_REGION = "us-east-1"
+        REPO_NAME  = "my-apache-app"
+        ACCOUNT_ID = "147237731579" // replace with your AWS account ID
+        IMAGE_TAG  = "${env.BUILD_NUMBER}" // Jenkins build number
+    }
+    
     stages {
         stage('build') {
             steps {
-                sh "docker build -t my-apache-app:${env.BUILD_NUMBER} ."
+                sh "docker build -t ${REPO_NAME}:${env.BUILD_NUMBER} ."
             }
         }
 
@@ -12,7 +20,7 @@ pipeline {
             steps {
                 sh """
                 echo "Pushing Docker image to ECR..."
-                docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/my-apache-app:${env.BUILD_NUMBER}
+                docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/${REPO_NAME}:${IMAGE_TAG}
                 """
             }
         }
@@ -20,7 +28,7 @@ pipeline {
         
         stage('deploy') {
             steps {
-                sh "docker run -d -p 808${env.BUILD_NUMBER}:80 my-apache-app:${env.BUILD_NUMBER}"
+                sh "docker run -d -p 808${env.BUILD_NUMBER}:80 ${REPO_NAME}:${env.BUILD_NUMBER}"
             }
         }
     }
