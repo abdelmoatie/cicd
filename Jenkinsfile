@@ -12,6 +12,7 @@ pipeline {
         stage('build') {
             steps {
                 sh "docker build -t ${REPO_NAME}:${env.BUILD_NUMBER} ."
+                sh "docker tag ${REPO_NAME}:${IMAGE_TAG} ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPO_NAME}:${IMAGE_TAG}"
             }
         }
 
