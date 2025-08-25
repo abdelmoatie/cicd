@@ -66,36 +66,40 @@ pipeline {
         }
 
         stage('Register Task Definition') {
-            steps {
-                sh '''
-                echo "==> Registering new ECS task definition..."
-                NEW_TASK_DEF=$(jq -n --arg IMAGE "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPO_NAME}:${IMAGE_TAG}" '{
-                    family: "${TASK_FAMILY}",
-                    networkMode: "awsvpc",
-                    requiresCompatibilities: ["FARGATE"],
-                    cpu: "256",
-                    memory: "512",
-                    executionRoleArn: "arn:aws:iam::\${ACCOUNT_ID}:role/ecsTaskExecutionRole",
-                    containerDefinitions: [
-                        {
-                            name: "${CONTAINER_NAME}",
-                            image: $IMAGE,
-                            essential: true,
-                            portMappings: [
-                              { containerPort: 80, protocol: "tcp" }
-                            ]
-                        }
-                    ]
-                }')
+    steps {
+        sh '''
+        echo "==> Getting execution role ARN dynamically..."
+        EXEC_ROLE_ARN=$(aws iam get-role \
+            --role-name ecsTaskExecutionRole \
+            --query 'Role.Arn' \
+            --output text)
 
-                echo "$NEW_TASK_DEF" > taskdef.json
-                aws ecs register-task-definition \
-                    --cli-input-json file://taskdef.json \
-                    --region ${AWS_REGION}
-                '''
-            }
-        }
+        echo "==> Registering new ECS task definition with role $EXEC_ROLE_ARN"
+        NEW_TASK_DEF=$(jq -n --arg IMAGE "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPO_NAME}:${IMAGE_TAG}" --arg EXEC_ROLE "$EXEC_ROLE_ARN" '{
+            family: "${TASK_FAMILY}",
+            networkMode: "awsvpc",
+            requiresCompatibilities: ["FARGATE"],
+            cpu: "256",
+            memory: "512",
+            executionRoleArn: $EXEC_ROLE,
+            containerDefinitions: [
+                {
+                    name: "${CONTAINER_NAME}",
+                    image: $IMAGE,
+                    essential: true,
+                    portMappings: [{ containerPort: 80, protocol: "tcp" }]
+                }
+            ]
+        }')
 
+        echo "$NEW_TASK_DEF" > taskdef.json
+        aws ecs register-task-definition \
+            --cli-input-json file://taskdef.json \
+            --region ${AWS_REGION}
+        '''
+    }
+}
+        
         stage('Deploy to ECS Fargate') {
             steps {
                 sh '''
