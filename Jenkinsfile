@@ -8,7 +8,7 @@ pipeline {
         IMAGE_TAG      = "${env.BUILD_NUMBER}" // Jenkins build number
         CLUSTER_NAME   = "my-ecs-cluster" // ECS cluster name
         SERVICE_NAME   = "my-ecs-service" // ECS service name
-        TASK_FAMILY    = "my-ecs-taskdef" // ECS task definition family
+        TASK_FAMILY    = "myecstaskdef" // ECS task definition family
         CONTAINER_NAME = "my-apache-container" // must match container name in task definition
         SUBNET_1       = "subnet-093812277454ebbea" // replace with your subnet IDs
         SUBNET_2       = "subnet-00f123192c9ab3108"
