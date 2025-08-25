@@ -11,7 +11,7 @@ pipeline {
         TASK_FAMILY    = "my-ecs-taskdef" // ECS task definition family
         CONTAINER_NAME = "my-apache-container" // must match container name in task definition
         SUBNET_1       = "subnet-093812277454ebbea" // replace with your subnet IDs
-        SUBNET_2       = "subnet-07eac7a6f8e51afe5"
+        SUBNET_2       = "subnet-00f123192c9ab3108"
         SECURITY_GROUP = "sg-07144bd7e3fdbb654" // replace with your ECS service security group
     }
     
