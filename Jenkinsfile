@@ -75,7 +75,7 @@ pipeline {
                     requiresCompatibilities: ["FARGATE"],
                     cpu: "256",
                     memory: "512",
-                    executionRoleArn: "arn:aws:iam::${ACCOUNT_ID}:role/ecsTaskExecutionRole",
+                    executionRoleArn: "arn:aws:iam::\${ACCOUNT_ID}:role/ecsTaskExecutionRole",
                     containerDefinitions: [
                         {
                             name: "${CONTAINER_NAME}",
