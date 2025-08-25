@@ -43,10 +43,17 @@ pipeline {
                     --role-name ecsTaskExecutionRole \
                     --policy-arn arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
                 fi
-
+                
                 echo "==> Ensuring ECS cluster exists..."
-                aws ecs describe-clusters --clusters ${CLUSTER_NAME} --region ${AWS_REGION} | grep ${CLUSTER_NAME} >/dev/null 2>&1 || \
-                aws ecs create-cluster --cluster-name ${CLUSTER_NAME} --region ${AWS_REGION}
+                CLUSTER_STATUS=$(aws ecs describe-clusters --clusters ${CLUSTER_NAME} --region ${AWS_REGION} --query 'clusters[0].status' --output text 2>/dev/null || echo "MISSING")
+
+                if [ "$CLUSTER_STATUS" != "ACTIVE" ]; then
+                   echo "Cluster ${CLUSTER_NAME} not found. Creating..."
+                   aws ecs create-cluster --cluster-name ${CLUSTER_NAME} --region ${AWS_REGION}
+                else
+                   echo "Cluster ${CLUSTER_NAME} already exists."
+                fi
+                
                 '''
             }
         }
