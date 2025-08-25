@@ -18,7 +18,7 @@ pipeline {
     stages {
         stage('Ensure Prerequisites') {
             steps {
-                sh """
+                sh '''
                 set -e
 
                 echo "==> Ensuring ECR repository exists..."
@@ -47,7 +47,7 @@ pipeline {
                 echo "==> Ensuring ECS cluster exists..."
                 aws ecs describe-clusters --clusters ${CLUSTER_NAME} --region ${AWS_REGION} | grep ${CLUSTER_NAME} >/dev/null 2>&1 || \
                 aws ecs create-cluster --cluster-name ${CLUSTER_NAME} --region ${AWS_REGION}
-                """
+                '''
             }
         }
         
@@ -67,7 +67,7 @@ pipeline {
 
         stage('Register Task Definition') {
             steps {
-                sh """
+                sh '''
                 echo "==> Registering new ECS task definition..."
                 NEW_TASK_DEF=$(jq -n --arg IMAGE "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPO_NAME}:${IMAGE_TAG}" '{
                     family: "${TASK_FAMILY}",
@@ -92,13 +92,13 @@ pipeline {
                 aws ecs register-task-definition \
                     --cli-input-json file://taskdef.json \
                     --region ${AWS_REGION}
-                """
+                '''
             }
         }
 
         stage('Deploy to ECS Fargate') {
             steps {
-                sh """
+                sh '''
                 echo "==> Ensuring ECS service exists..."
                 if ! aws ecs describe-services --cluster ${CLUSTER_NAME} --services ${SERVICE_NAME} --region ${AWS_REGION} | grep ${SERVICE_NAME} >/dev/null 2>&1; then
                   aws ecs create-service \
@@ -118,7 +118,7 @@ pipeline {
                     --force-new-deployment \
                     --region ${AWS_REGION}
                 fi
-                """
+                '''
             }
         }
     }
